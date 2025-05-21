@@ -1,6 +1,8 @@
 pytest
+lifelines
+matplotlib
 numpy
+pandas
 scikit-learn
 scikit-survival
-matplotlib
 seaborn
