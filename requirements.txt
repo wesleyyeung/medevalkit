@@ -1,0 +1,6 @@
+pytest
+numpy
+scikit-learn
+scikit-survival
+matplotlib
+seaborn
