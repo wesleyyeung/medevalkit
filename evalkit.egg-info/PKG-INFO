@@ -1,17 +1,19 @@
 Metadata-Version: 2.4
 Name: evalkit
 Version: 0.1.0
-Summary: A toolkit for evaluating machine learning models.
+Summary: A toolkit for evaluating machine learning models for healthcare applications.
 Author: wy
 Author-email: corona-monody-7e@icloud.com
 Requires-Python: >=3.7
 Description-Content-Type: text/markdown
 License-File: LICENSE
-Requires-Dist: numpy
-Requires-Dist: scikit-learn
+Requires-Dist: lifelines
 Requires-Dist: matplotlib
+Requires-Dist: numpy
+Requires-Dist: pandas
+Requires-Dist: scikit-learn
+Requires-Dist: scikit-survival
 Requires-Dist: seaborn
-Requires-Dist: xgboost
 Dynamic: author
 Dynamic: author-email
 Dynamic: description
