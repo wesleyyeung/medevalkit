@@ -3,7 +3,7 @@ from sklearn.datasets import load_breast_cancer, load_diabetes
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-from evalkit.evaluate import Evaluate
+from medevalkit.evaluate import Evaluate
 
 def test_evaluate_binary_classification_report():
     X, y = load_breast_cancer(return_X_y=True)

@@ -1,5 +1,5 @@
 import numpy as np
-from evalkit.metrics import (
+from medevalkit.metrics import (
     binary_classification_metrics,
     regression_metrics
 )

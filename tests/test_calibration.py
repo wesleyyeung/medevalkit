@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from evalkit.calibration import MulticlassCalibration
+from medevalkit.calibration import MulticlassCalibration
 
 def test_multiclass_calibration_outputs():
     X, y = load_iris(return_X_y=True)

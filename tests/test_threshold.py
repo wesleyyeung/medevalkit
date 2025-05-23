@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics import confusion_matrix
-from evalkit.threshold import ThresholdAnalysis, DecisionCurveAnalysis
+from medevalkit.threshold import ThresholdAnalysis, DecisionCurveAnalysis
 
 def test_threshold_analysis_outputs_expected_metrics():
     y_true = np.array([0, 0, 1, 1, 1, 0, 1, 0, 1, 1])

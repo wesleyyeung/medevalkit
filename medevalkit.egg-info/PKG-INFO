@@ -1,8 +1,8 @@
 Metadata-Version: 2.4
-Name: evalkit-beta
-Version: 0.1.0
+Name: medevalkit
+Version: 0.1.2
 Summary: A toolkit for evaluating machine learning models for healthcare applications.
-Author: wy
+Author: Wesley Yeung
 Author-email: corona-monody-7e@icloud.com
 Requires-Python: >=3.7
 Description-Content-Type: text/markdown
@@ -23,9 +23,9 @@ Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary
 
-# EvalKit
+# MedEvalKit
 
-**EvalKit** is a modular and extensible Python toolkit for evaluating machine learning models, especially in healthcare applications. It provides unified APIs for computing metrics, calibration curves, bootstrap confidence intervals, and plotting diagnostic curves.
+**MedEvalKit** is a modular and extensible Python toolkit for evaluating machine learning models, especially in healthcare applications. It provides unified APIs for computing metrics, calibration curves, bootstrap confidence intervals, and plotting diagnostic curves.
 
 ## Features
 
@@ -39,12 +39,24 @@ Dynamic: summary
 ## Installation
 
 ```bash
-pip install dist/evalkit-0.1.0-py3-none-any.whl
+pip install medevalkit
 ```
 
 ## Usage Example
 
-See `evalkit_demo.ipynb` for examples.
+```python
+from medevalkit import Evaluate
+
+clf.fit(X_train, y_train)
+
+evaluator = Evaluate(clf, X_test, y_test, classification=True, threshold=threshold)
+report = evaluator.generate_report(bootstrap=True)
+print(report['text_report'])
+```
+
+## GitHub Repo
+
+Visit https://github.com/wesleyyeung/medevalkit for more examples.
 
 ## License
 
