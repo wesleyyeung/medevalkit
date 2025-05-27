@@ -42,6 +42,11 @@ class BinaryClassificationMetrics(BaseClassificationMetrics):
         tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
         return tn / (tn + fn) if (tn + fn) > 0 else 0
 
+    @staticmethod
+    def accuracy(y_true, y_pred):
+        tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+        return (tp + tn) / (tp + tn + fp + fn)
+
     def compute(self, bootstrap: bool = True, n_resamples: int = 1000) -> dict:
         if bootstrap:
             bs = Bootstrapper(n_resamples=n_resamples)
@@ -52,6 +57,7 @@ class BinaryClassificationMetrics(BaseClassificationMetrics):
             spec, spec_lower, spec_upper = bs.bootstrap_ci(self.specificity,y_true=self.y_true,y_pred=self.y_pred)
             ppv, ppv_lower, ppv_upper = bs.bootstrap_ci(self.ppv,y_true=self.y_true,y_pred=self.y_pred)
             npv, npv_lower,  npv_upper = bs.bootstrap_ci(self.npv,y_true=self.y_true,y_pred=self.y_pred)
+            acc, acc_lower, acc_upper = bs.bootstrap_ci(self.accuracy,y_true=self.y_true,y_pred=self.y_pred)
             return {
                 'auc': auc,
                 'auc_upper': auc_upper,
@@ -73,7 +79,10 @@ class BinaryClassificationMetrics(BaseClassificationMetrics):
                 'ppv_lower': ppv_lower,
                 'npv': npv,
                 'npv_upper': npv_upper,
-                'npv_lower': npv_lower
+                'npv_lower': npv_lower,
+                'accuracy': acc,
+                'accuracy_upper': acc_upper,
+                'accuracy_lower': acc_lower
             }
         else:
             tn, fp, fn, tp = confusion_matrix(self.y_true, self.y_pred).ravel()
@@ -85,6 +94,7 @@ class BinaryClassificationMetrics(BaseClassificationMetrics):
                 'specificity': tn / (tn + fp),
                 'ppv': tp / (tp + fp) if (tp + fp) > 0 else 0,
                 'npv': tn / (tn + fn) if (tn + fn) > 0 else 0,
+                'accuracy': (tp + tn) / (tp + tn + fp + fn)
             }
         
     def compute_static(self, bootstrap: bool = True, n_resamples: int = 1000) -> dict:
@@ -95,6 +105,7 @@ class BinaryClassificationMetrics(BaseClassificationMetrics):
                 spec, spec_lower, spec_upper = bs.bootstrap_ci(self.specificity,y_true=self.y_true,y_pred=self.y_pred)
                 ppv, ppv_lower, ppv_upper = bs.bootstrap_ci(self.ppv,y_true=self.y_true,y_pred=self.y_pred)
                 npv, npv_lower,  npv_upper = bs.bootstrap_ci(self.npv,y_true=self.y_true,y_pred=self.y_pred)
+                acc, acc_lower, acc_upper = bs.bootstrap_ci(self.accuracy,y_true=self.y_true,y_pred=self.y_pred)
                 return {
                     'f1': f1,
                     'f1_upper': f1_upper,
@@ -110,7 +121,10 @@ class BinaryClassificationMetrics(BaseClassificationMetrics):
                     'ppv_lower': ppv_lower,
                     'npv': npv,
                     'npv_upper': npv_upper,
-                    'npv_lower': npv_lower
+                    'npv_lower': npv_lower,
+                    'accuracy': acc,
+                    'accuracy_upper': acc_upper,
+                    'accuracy_lower': acc_lower
                 }
             else:     
                 tn, fp, fn, tp = confusion_matrix(self.y_true, self.y_pred).ravel()
@@ -120,6 +134,7 @@ class BinaryClassificationMetrics(BaseClassificationMetrics):
                     'specificity': tn / (tn + fp),
                     'ppv': tp / (tp + fp) if (tp + fp) > 0 else 0,
                     'npv': tn / (tn + fn) if (tn + fn) > 0 else 0,
+                    'accuracy': (tp + tn) / (tp + tn + fp + fn)
                 }
 
 class MulticlassClassificationMetrics(BaseClassificationMetrics):
