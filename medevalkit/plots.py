@@ -10,8 +10,8 @@ from sklearn.preprocessing import label_binarize
 from .compare import ModelComparer, delong_test
 from .bootstrap import Bootstrapper
 
-# Set a professional seaborn style for all plots
-sns.set_theme(style="whitegrid", palette="deep", font_scale=1.2)
+# Set custom style sheet for all plots
+plt.style.use('medevalkit/styles/ieee.mplstyle')
 
 def plot_roc_curve(y_true, y_prob, label='Model', save_path=None):
     """
@@ -26,21 +26,19 @@ def plot_roc_curve(y_true, y_prob, label='Model', save_path=None):
     fpr, tpr, _ = roc_curve(y_true, y_prob)
     roc_auc = auc(fpr, tpr)
 
-    plt.figure(figsize=(7, 7)) # Increased figure size
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'{label} (AUC = {roc_auc:.3f})')
-    plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--', label='Random Guess')
+    plt.plot(fpr, tpr, label=f'{label} (AUC = {roc_auc:.3f})')
+    plt.plot([0, 1], [0, 1], color='gray', linestyle='--', label='Random Guess')
 
-    plt.xlabel('False Positive Rate', fontsize=14)
-    plt.ylabel('True Positive Rate', fontsize=14)
-    plt.title('Receiver Operating Characteristic (ROC) Curve', fontsize=16)
-    plt.legend(loc='lower right', fontsize=12)
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend()
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.gca().set_aspect('equal', adjustable='box') # Ensure 1:1 aspect ratio
     plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path, bbox_inches='tight')
     plt.show()
 
 def plot_multiclass_roc(y_true, y_score, class_labels=None, save_path=None):
