@@ -10,8 +10,8 @@ from sklearn.preprocessing import label_binarize
 from .compare import ModelComparer, delong_test
 from .bootstrap import Bootstrapper
 
-# Set a professional seaborn style for all plots
-sns.set_theme(style="whitegrid", palette="deep", font_scale=1.2)
+# Set custom style sheet for all plots
+plt.style.use('medevalkit/custom.mplstyle')
 
 def plot_roc_curve(y_true, y_prob, label='Model', save_path=None):
     """
