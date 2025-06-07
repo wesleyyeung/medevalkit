@@ -26,14 +26,13 @@ def plot_roc_curve(y_true, y_prob, label='Model', save_path=None):
     fpr, tpr, _ = roc_curve(y_true, y_prob)
     roc_auc = auc(fpr, tpr)
 
-    plt.plot(fpr, tpr, lw=2, label=f'{label} (AUC = {roc_auc:.3f})')
-    plt.plot([0, 1], [0, 1], color='gray', lw=1, linestyle='--', label='Random Guess')
+    plt.plot(fpr, tpr, label=f'{label} (AUC = {roc_auc:.3f})')
+    plt.plot([0, 1], [0, 1], color='gray', linestyle='--', label='Random Guess')
 
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
     plt.title('Receiver Operating Characteristic (ROC) Curve')
-    plt.legend(loc='lower right')
-    plt.grid(True, alpha=0.7)
+    plt.legend()
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.gca().set_aspect('equal', adjustable='box') # Ensure 1:1 aspect ratio
