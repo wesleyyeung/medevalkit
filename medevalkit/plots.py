@@ -184,12 +184,9 @@ def plot_threshold_metrics(threshold_dict, metrics=('sensitivity', 'specificity'
     """
     df = pd.DataFrame.from_dict(threshold_dict, orient='index').sort_index(ascending=True)
     
-    plt.figure(figsize=(10, 7))
-    colors = sns.color_palette("viridis", len(metrics))
-    
     for i, metric in enumerate(metrics):
         if metric in df.columns:
-            plt.plot(df.index, df[metric], label=metric.replace('_', ' ').title(), lw=2, color=colors[i])
+            plt.plot(df.index, df[metric], label=metric.replace('_', ' ').title())
             
     plt.xlabel('Threshold')
     plt.ylabel('Metric Value')
