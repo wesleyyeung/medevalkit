@@ -36,9 +36,8 @@ def plot_roc_curve(y_true, y_prob, label='Model', save_path=None):
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.gca().set_aspect('equal', adjustable='box') # Ensure 1:1 aspect ratio
-    plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_multiclass_roc(y_true, y_score, class_labels=None, save_path=None):
@@ -57,26 +56,22 @@ def plot_multiclass_roc(y_true, y_score, class_labels=None, save_path=None):
 
     y_true_bin = label_binarize(y_true, classes=np.arange(n_classes))
 
-    plt.figure(figsize=(9, 8)) # Larger figure for multiple curves
-    colors = sns.color_palette("deep", n_classes)
-
     for i in range(n_classes):
         fpr, tpr, _ = roc_curve(y_true_bin[:, i], y_score[:, i])
         roc_auc = auc(fpr, tpr)
-        plt.plot(fpr, tpr, lw=2.5, label=f'{class_labels[i]} (AUC = {roc_auc:.3f})', color=colors[i])
+        plt.plot(fpr, tpr, label=f'{class_labels[i]} (AUC = {roc_auc:.3f})')
 
-    plt.plot([0, 1], [0, 1], 'k--', lw=1, alpha=0.7, label='Random Guess')
-    plt.xlabel('False Positive Rate', fontsize=14)
-    plt.ylabel('True Positive Rate', fontsize=14)
-    plt.title('Multiclass ROC Curve (One-vs-Rest)', fontsize=16)
-    plt.legend(loc='lower right', fontsize=12)
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.plot([0, 1], [0, 1], 'k--', label='Random Guess')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Multiclass ROC Curve (One-vs-Rest)')
+    plt.legend()
+    plt.grid(True)
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.gca().set_aspect('equal', adjustable='box')
-    plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_calibration_curve(y_true, y_prob, n_bins=10, label='Model', save_path=None):
