@@ -148,21 +148,20 @@ def plot_decision_curve(dca_df, label='Model', save_path=None):
         label (str): Label for the model in the legend.
         save_path (str, optional): Path to save the plot.
     """
-    plt.figure(figsize=(8, 6))
-    plt.plot(dca_df['threshold'], dca_df['net_benefit'], label=label, lw=2, color='purple')
-    plt.axhline(0, linestyle='--', color='gray', linewidth=1, alpha=0.8, label='Treat All/Treat None')
+    plt.plot(dca_df['threshold'], dca_df['net_benefit'], label=label)
+    plt.axhline(0, linestyle='--', color='gray', label='Treat All/Treat None')
     
     # Optional: Plot 'treat all' and 'treat none' if available in dca_df or calculable
     if 'net_benefit_all' in dca_df.columns:
-        plt.plot(dca_df['threshold'], dca_df['net_benefit_all'], linestyle=':', color='red', lw=1.5, label='Treat All')
+        plt.plot(dca_df['threshold'], dca_df['net_benefit_all'], label='Treat All')
     if 'net_benefit_none' in dca_df.columns:
-        plt.plot(dca_df['threshold'], dca_df['net_benefit_none'], linestyle=':', color='blue', lw=1.5, label='Treat None')
+        plt.plot(dca_df['threshold'], dca_df['net_benefit_none'], label='Treat None')
 
-    plt.xlabel('Threshold Probability', fontsize=14)
-    plt.ylabel('Net Benefit', fontsize=14)
-    plt.title('Decision Curve Analysis', fontsize=16)
-    plt.legend(loc='upper right', fontsize=12)
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.xlabel('Threshold Probability')
+    plt.ylabel('Net Benefit')
+    plt.title('Decision Curve Analysis')
+    plt.legend()
+    plt.grid(True)
     plt.xlim([0, 1])
     # Adjust y-axis limits to better fit data and include 0
     min_nb = dca_df['net_benefit'].min()
@@ -171,7 +170,7 @@ def plot_decision_curve(dca_df, label='Model', save_path=None):
     
     plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_threshold_metrics(threshold_dict, metrics=('sensitivity', 'specificity', 'ppv', 'npv'), save_path=None):
