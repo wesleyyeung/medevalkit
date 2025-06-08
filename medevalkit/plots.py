@@ -87,21 +87,19 @@ def plot_calibration_curve(y_true, y_prob, n_bins=10, label='Model', save_path=N
     """
     prob_true, prob_pred = calibration_curve(y_true, y_prob, n_bins=n_bins)
 
-    plt.figure(figsize=(7, 7))
     plt.plot([0, 1], [0, 1], linestyle='--', color='gray', label='Perfectly Calibrated')
-    plt.plot(prob_pred, prob_true, marker='o', lw=2, label=label, color='darkgreen')
+    plt.plot(prob_pred, prob_true, marker='o', label=label)
     
-    plt.xlabel('Mean Predicted Probability', fontsize=14)
-    plt.ylabel('Fraction of Positives (True Probability)', fontsize=14)
-    plt.title('Calibration Curve', fontsize=16)
-    plt.legend(loc='upper left', fontsize=12)
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.xlabel('Mean Predicted Probability')
+    plt.ylabel('Fraction of Positives (True Probability)')
+    plt.title('Calibration Curve')
+    plt.legend()
+    plt.grid(True)
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.gca().set_aspect('equal', adjustable='box')
-    plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_multiclass_calibration(calibration_obj, class_labels=None, save_path=None):
