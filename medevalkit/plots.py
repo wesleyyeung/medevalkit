@@ -191,16 +191,16 @@ def plot_threshold_metrics(threshold_dict, metrics=('sensitivity', 'specificity'
         if metric in df.columns:
             plt.plot(df.index, df[metric], label=metric.replace('_', ' ').title(), lw=2, color=colors[i])
             
-    plt.xlabel('Threshold', fontsize=14)
-    plt.ylabel('Metric Value', fontsize=14)
-    plt.title('Threshold Analysis Metrics', fontsize=16)
-    plt.legend(loc='center right', bbox_to_anchor=(1.2, 0.5), fontsize=12) # External legend
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.xlabel('Threshold')
+    plt.ylabel('Metric Value')
+    plt.title('Threshold Analysis Metrics')
+    plt.legend()
+    plt.grid(True)
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.tight_layout() # Adjust for external legend
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_regression_diagnostics(y_true, y_pred, save_path=None):
