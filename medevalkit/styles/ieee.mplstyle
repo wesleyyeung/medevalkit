@@ -51,6 +51,12 @@ text.usetex         : False
 # === Legend ===
 legend.frameon      : False
 legend.loc          : lower right
-legend.fontsize     : 8
-legend.borderaxespad: 0.5
+legend.fontsize     : 6
+legend.borderaxespad: 0.3
 legend.columnspacing: 1.0
+legend.edgecolor    : 0.9
+legend.facecolor    : white
+legend.framealpha   : 1.0
+legend.handlelength  : 1.5
+legend.handletextpad : 0.4
+legend.labelspacing  : 0.3

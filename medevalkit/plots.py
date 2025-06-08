@@ -267,86 +267,61 @@ def plot_multiple_roc_curves_with_comparison(
         save_path (str, optional): Path to save the plot.
     """
     model_names = list(model_probs.keys())
-    aucs = {}
     stats = []
-
-    plt.figure(figsize=(9, 8)) # Larger figure
-    colors = sns.color_palette("deep", len(model_names))
-
     for i, name in enumerate(model_names):
-        y_prob = model_probs[name]
-        fpr, tpr, _ = roc_curve(y_true, y_prob)
+        fpr, tpr, _ = roc_curve(y_true, model_probs[name])
         auc_val = auc(fpr, tpr)
-        aucs[name] = auc_val
-        plt.plot(fpr, tpr, lw=2.5, label=f'{name} (AUC = {auc_val:.3f})', color=colors[i])
+        plt.plot(
+            fpr, tpr,
+            label=f"{name} (AUC = {auc_val:.3f})",
+        )
 
     # Plot settings
-    plt.plot([0, 1], [0, 1], linestyle='--', color='gray', lw=1, alpha=0.7, label='Random Guess')
-    plt.xlabel("False Positive Rate", fontsize=14)
-    plt.ylabel("True Positive Rate", fontsize=14)
-    plt.title("Comparison of ROC Curves", fontsize=16)
-    plt.grid(True, linestyle=':', alpha=0.7)
-    plt.xlim([-0.01, 1.01])
-    plt.ylim([-0.01, 1.01])
+    plt.plot(
+        [0, 1], [0, 1],
+        linestyle='--',
+        label='Random Guess',
+        color='gray'
+    )
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Comparison of ROC Curves")
+    plt.grid(True)
+    plt.minorticks_on()
+    plt.grid(which='minor')
+    plt.xlim(-0.01, 1.01)
+    plt.ylim(-0.01, 1.01)
     plt.gca().set_aspect('equal', adjustable='box')
 
-    # Compute pairwise comparisons
-    if len(model_names) >= 2:
-        text_y_offset = 0.04
-        current_y_pos = 0.95 # Starting y position for p-values
-        
+    # Pairwise p-value annotations outside the plot
+    if show_pvalues_on_plot and len(model_names) > 1:
+        y0 = 0.95
         for i in range(len(model_names)):
             for j in range(i + 1, len(model_names)):
                 name1, name2 = model_names[i], model_names[j]
-                
-                # Check for mock functions and adjust calls
                 if method == "delong":
-                    if 'mock_delong_test' in globals() and delong_test.__name__ == 'mock_delong_test':
-                        # Call mock function with appropriate arguments
-                        pval, auc1, auc2 = delong_test(y_true, model_probs[name1], model_probs[name2])
-                    else:
-                        pval, auc1, auc2 = delong_test(y_true, model_probs[name1], model_probs[name2])
-                elif method == "bootstrap":
-                    bs = Bootstrapper(n_resamples=n_resamples)
-                    auc_dist1 = bs.bootstrap(metric_fn=roc_auc_score, y_true=y_true, y_pred=model_probs[name1])
-                    auc_dist2 = bs.bootstrap(metric_fn=roc_auc_score, y_true=y_true, y_pred=model_probs[name2])
-                    
-                    test_func = (
-                        ModelComparer.parametric if parametric else ModelComparer.nonparametric
-                    )
-                    pval = test_func(auc_dist1, auc_dist2)
-                    auc1, auc2 = np.median(auc_dist1), np.median(auc_dist2)
+                    pval, _, _ = delong_test(y_true, model_probs[name1], model_probs[name2])
                 else:
-                    raise ValueError("method must be 'delong' or 'bootstrap'")
+                    bs = Bootstrapper(n_resamples=n_resamples)
+                    dist1 = bs.bootstrap(roc_auc_score, y_true, model_probs[name1])
+                    dist2 = bs.bootstrap(roc_auc_score, y_true, model_probs[name2])
+                    test_fn = ModelComparer.parametric if parametric else ModelComparer.nonparametric
+                    pval = test_fn(dist1, dist2)
 
-                stats.append({
-                    "Model 1": name1,
-                    "Model 2": name2,
-                    "AUC 1": auc1,
-                    "AUC 2": auc2,
-                    "p-value": pval
-                })
+                stats.append({"Model 1": name1, "Model 2": name2, "p-value": pval})
+                p_str = 'p < 0.001' if pval < 0.001 else f'p = {pval:.3f}'
 
-                if show_pvalues_on_plot:
-                    if pval < 0.001:
-                        pval_str = 'p < 0.001'
-                    else:
-                        pval_str = f'p = {pval:.3f}'
-                    
-                    plt.text(
-                        0.02, current_y_pos,
-                        f"Comparison {name1} vs {name2}: {pval_str}",
-                        transform=plt.gca().transAxes, # Use axes coordinates
-                        fontsize=10,
-                        bbox=dict(boxstyle="round,pad=0.3", fc="wheat", ec="black", lw=0.5, alpha=0.8) # Add bbox for clarity
-                    )
-                    current_y_pos -= text_y_offset # Move down for next p-value
+                plt.annotate(
+                    f"{name1} vs {name2}: {p_str}",
+                    xy=(1.02, y0), xycoords='axes fraction',
+                    ha='left', va='top', fontsize=8
+                )
+                y0 -= 0.05
 
+    plt.legend()
 
-    plt.legend(loc="lower right", fontsize=12)
-    plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
     if return_stats:
