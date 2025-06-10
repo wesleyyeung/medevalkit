@@ -403,7 +403,6 @@ def plot_auc_bar_chart_with_error_bars(
     pval_df: pd.DataFrame = None, # Changed to DataFrame for more flexible p-value display
     ci: float = 0.95,
     title: str = "AUC Comparison with Confidence Intervals",
-    figsize: tuple = (10, 7), # Increased figure size
     annotate: bool = True,
     ylim: tuple = None,
     save_path: str = None
@@ -422,115 +421,87 @@ def plot_auc_bar_chart_with_error_bars(
         ylim (tuple, optional): Custom y-axis limits.
         save_path (str, optional): Path to save the plot.
     """
-    model_names = list(auc_dict.keys())
-    auc_values = [np.median(auc_dict[m]) for m in model_names]
-    
-    alpha_ci = (1 - ci) / 2 * 100
-    lower_bounds = [np.percentile(auc_dict[m], alpha_ci) for m in model_names]
-    upper_bounds = [np.percentile(auc_dict[m], 100 - alpha_ci) for m in model_names]
-    
-    error_bars = np.array([
-        [median - lower, upper - median]
-        for median, lower, upper in zip(auc_values, lower_bounds, upper_bounds)
-    ]).T
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-    plt.figure(figsize=figsize)
-    bars = plt.bar(
+    model_names = list(auc_dict.keys())
+    medians = [np.median(auc_dict[m]) for m in model_names]
+    alpha = (1 - ci) / 2 * 100
+    lowers = [np.percentile(auc_dict[m], alpha) for m in model_names]
+    uppers = [np.percentile(auc_dict[m], 100 - alpha) for m in model_names]
+    errs = np.array([[m - lo, hi - m] for m, lo, hi in zip(medians, lowers, uppers)]).T
+
+    fig, ax = plt.subplots()
+    bars = ax.bar(
         model_names,
-        auc_values,
-        yerr=error_bars,
-        capsize=8, # Larger caps for error bars
-        alpha=0.9,
-        color=sns.color_palette("viridis", len(model_names)), # Use viridis for bars
-        edgecolor="black",
-        lw=1.5 # Thicker bar edges
+        medians,
+        yerr=errs,
+        capsize=3,
+        color=colors[:len(model_names)]
     )
 
-    # Annotate each bar with AUC and CI
+    # Spacing
+    bar_label_offset    = 0.002 
+    bracket_base_offset = 0.008    
+    bracket_height      = 0.0015   
+    pval_text_offset    = 0.001 
+    bar_label_fs = 7
+    pval_text_fs = 6
+
     if annotate:
-        for i, bar in enumerate(bars):
-            auc = auc_values[i]
-            lb = lower_bounds[i]
-            ub = upper_bounds[i]
-            label = f"{auc:.3f}\n[{lb:.3f}, {ub:.3f}]"
-            plt.text(
-                bar.get_x() + bar.get_width() / 2,
-                ub + 0.015, # Position slightly above upper CI
-                label,
-                ha='center',
-                va='bottom',
-                fontsize=10,
-                color='darkblue'
+        for bar, m, lo, hi in zip(bars, medians, lowers, uppers):
+            ax.text(
+                bar.get_x() + bar.get_width()/2,
+                hi + bar_label_offset,
+                f"{m:.3f}\n[{lo:.3f}, {hi:.3f}]",
+                ha="center", va="bottom",
+                fontsize=bar_label_fs
             )
 
-    # Calculate max Y for positioning brackets
-    max_y_for_brackets = max(upper_bounds) + 0.02
-    
+    # Draw p-value brackets
+    used_heights = {}
     if pval_df is not None and not pval_df.empty:
-        # Sort p-values to ensure consistent bracket drawing, e.g., smallest p-value first
-        pval_df = pval_df.sort_values(by="p-value").reset_index(drop=True)
-        
-        # Track occupied y-levels for brackets to avoid overlap
-        y_level_tracker = {} # Key: model name, Value: highest y-level used by its brackets
+        pval_df = pval_df.sort_values("p-value").reset_index(drop=True)
+        for _, row in pval_df.iterrows():
+            m1, m2, p = row["Model 1"], row["Model 2"], row["p-value"]
+            i1, i2 = model_names.index(m1), model_names.index(m2)
+            x1 = bars[i1].get_x() + bars[i1].get_width()/2
+            x2 = bars[i2].get_x() + bars[i2].get_width() + bars[i2].get_width()/2 - bars[i2].get_width()
 
-        for i, row in pval_df.iterrows():
-            m1, m2, pval = row["Model 1"], row["Model 2"], row["p-value"]
-            
-            idx1 = model_names.index(m1)
-            idx2 = model_names.index(m2)
-            
-            x1 = bars[idx1].get_x() + bars[idx1].get_width() / 2
-            x2 = bars[idx2].get_x() + bars[idx2].get_width() / 2
-            
-            # Determine starting y for this bracket based on involved bars' heights
-            current_bracket_y = max(upper_bounds[idx1], upper_bounds[idx2]) + 0.015
-            
-            # Adjust y-level to avoid collision with other brackets
-            if m1 in y_level_tracker:
-                current_bracket_y = max(current_bracket_y, y_level_tracker[m1] + 0.015)
-            if m2 in y_level_tracker:
-                current_bracket_y = max(current_bracket_y, y_level_tracker[m2] + 0.015)
-            
-            # Update tracker
-            y_level_tracker[m1] = current_bracket_y
-            y_level_tracker[m2] = current_bracket_y
+            base = max(uppers[i1], uppers[i2]) + bracket_base_offset
+            y0 = base + (bracket_height + 0.001) * len(used_heights)
+            used_heights[m1] = used_heights[m2] = y0
 
-            # Adjust max_y_for_brackets
-            max_y_for_brackets = max(max_y_for_brackets, current_bracket_y + 0.02) # Add space for p-value text
+            ax.plot(
+                [x1, x1, x2, x2],
+                [y0, y0 + bracket_height, y0 + bracket_height, y0],
+                color="black"
+            )
 
-            h = 0.005 # Height of the vertical line of the bracket
-            
-            if pval < 0.001:
-                pval_str = 'p < 0.001'
-            else:
-                pval_str = f'p = {pval:.3f}'
-            
-            # Draw the bracket
-            plt.plot([x1, x1, x2, x2], 
-                     [current_bracket_y, current_bracket_y + h, current_bracket_y + h, current_bracket_y], 
-                     lw=1.5, color='black')
-            
-            # Place the p-value text
-            plt.text((x1 + x2) / 2, current_bracket_y + h + 0.003, pval_str,
-                     ha='center', va='bottom', fontsize=11, color='darkred')
+            p_str = "p < 0.001" if p < 0.001 else f"p = {p:.3f}"
+            ax.text(
+                (x1 + x2)/2,
+                y0 + bracket_height + pval_text_offset,
+                p_str,
+                ha="center", va="bottom",
+                fontsize=pval_text_fs
+            )
 
-
-    # Set Y-axis limits
+    # Y-limits
     if ylim:
-        plt.ylim(*ylim)
+        ax.set_ylim(*ylim)
     else:
-        # Ensure there's enough space for bars, CIs, and potential p-value annotations
-        min_y = min(lower_bounds) - 0.05
-        max_y = max(max_y_for_brackets, max(upper_bounds) + 0.05)
-        plt.ylim(min_y, max_y)
+        low = min(lowers) - 0.005
+        high_candidates = uppers + list(used_heights.values())
+        high = max(high_candidates) + 0.005
+        ax.set_ylim(low, high)
 
-    plt.ylabel("AUC", fontsize=14)
-    plt.title(title, fontsize=16)
-    plt.grid(True, axis='y', linestyle='--', alpha=0.6)
-    plt.xticks(rotation=15, ha='right') # Rotate x-axis labels for better readability
-    plt.tight_layout()
+    ax.set_ylabel("AUC")
+    ax.set_title(title)
+    ax.grid(True)
+    plt.xticks()
+
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        fig.savefig(save_path)
     plt.show()
 
 def plot_kaplan_meier(durations, events, ax=None, label=None, save_path=None, **kwargs):
