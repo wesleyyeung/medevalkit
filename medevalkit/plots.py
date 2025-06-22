@@ -10,8 +10,8 @@ from sklearn.preprocessing import label_binarize
 from .compare import ModelComparer, delong_test
 from .bootstrap import Bootstrapper
 
-# Set a professional seaborn style for all plots
-sns.set_theme(style="whitegrid", palette="deep", font_scale=1.2)
+# Set custom style sheet for all plots
+plt.style.use('medevalkit/styles/ieee.mplstyle')
 
 def plot_roc_curve(y_true, y_prob, label='Model', save_path=None):
     """
@@ -26,21 +26,18 @@ def plot_roc_curve(y_true, y_prob, label='Model', save_path=None):
     fpr, tpr, _ = roc_curve(y_true, y_prob)
     roc_auc = auc(fpr, tpr)
 
-    plt.figure(figsize=(7, 7)) # Increased figure size
-    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f'{label} (AUC = {roc_auc:.3f})')
-    plt.plot([0, 1], [0, 1], color='navy', lw=1, linestyle='--', label='Random Guess')
+    plt.plot(fpr, tpr, label=f'{label} (AUC = {roc_auc:.3f})')
+    plt.plot([0, 1], [0, 1], color='gray', linestyle='--', label='Random Guess')
 
-    plt.xlabel('False Positive Rate', fontsize=14)
-    plt.ylabel('True Positive Rate', fontsize=14)
-    plt.title('Receiver Operating Characteristic (ROC) Curve', fontsize=16)
-    plt.legend(loc='lower right', fontsize=12)
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic (ROC) Curve')
+    plt.legend()
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.gca().set_aspect('equal', adjustable='box') # Ensure 1:1 aspect ratio
-    plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_multiclass_roc(y_true, y_score, class_labels=None, save_path=None):
@@ -59,26 +56,22 @@ def plot_multiclass_roc(y_true, y_score, class_labels=None, save_path=None):
 
     y_true_bin = label_binarize(y_true, classes=np.arange(n_classes))
 
-    plt.figure(figsize=(9, 8)) # Larger figure for multiple curves
-    colors = sns.color_palette("deep", n_classes)
-
     for i in range(n_classes):
         fpr, tpr, _ = roc_curve(y_true_bin[:, i], y_score[:, i])
         roc_auc = auc(fpr, tpr)
-        plt.plot(fpr, tpr, lw=2.5, label=f'{class_labels[i]} (AUC = {roc_auc:.3f})', color=colors[i])
+        plt.plot(fpr, tpr, label=f'{class_labels[i]} (AUC = {roc_auc:.3f})')
 
-    plt.plot([0, 1], [0, 1], 'k--', lw=1, alpha=0.7, label='Random Guess')
-    plt.xlabel('False Positive Rate', fontsize=14)
-    plt.ylabel('True Positive Rate', fontsize=14)
-    plt.title('Multiclass ROC Curve (One-vs-Rest)', fontsize=16)
-    plt.legend(loc='lower right', fontsize=12)
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.plot([0, 1], [0, 1], 'k--', label='Random Guess')
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Multiclass ROC Curve (One-vs-Rest)')
+    plt.legend()
+    plt.grid(True)
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.gca().set_aspect('equal', adjustable='box')
-    plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_calibration_curve(y_true, y_prob, n_bins=10, label='Model', save_path=None):
@@ -94,21 +87,19 @@ def plot_calibration_curve(y_true, y_prob, n_bins=10, label='Model', save_path=N
     """
     prob_true, prob_pred = calibration_curve(y_true, y_prob, n_bins=n_bins)
 
-    plt.figure(figsize=(7, 7))
     plt.plot([0, 1], [0, 1], linestyle='--', color='gray', label='Perfectly Calibrated')
-    plt.plot(prob_pred, prob_true, marker='o', lw=2, label=label, color='darkgreen')
+    plt.plot(prob_pred, prob_true, marker='o', label=label)
     
-    plt.xlabel('Mean Predicted Probability', fontsize=14)
-    plt.ylabel('Fraction of Positives (True Probability)', fontsize=14)
-    plt.title('Calibration Curve', fontsize=16)
-    plt.legend(loc='upper left', fontsize=12)
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.xlabel('Mean Predicted Probability')
+    plt.ylabel('Fraction of Positives (True Probability)')
+    plt.title('Calibration Curve')
+    plt.legend()
+    plt.grid(True)
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.gca().set_aspect('equal', adjustable='box')
-    plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_multiclass_calibration(calibration_obj, class_labels=None, save_path=None):
@@ -126,9 +117,6 @@ def plot_multiclass_calibration(calibration_obj, class_labels=None, save_path=No
     if class_labels is None:
         class_labels = [f'Class {i}' for i in range(n_classes)]
 
-    plt.figure(figsize=(9, 8))
-    colors = sns.color_palette("deep", n_classes)
-
     plt.plot([0, 1], [0, 1], linestyle='--', color='gray', label='Perfectly Calibrated', alpha=0.7)
 
     for k, result in curves.items():
@@ -136,19 +124,19 @@ def plot_multiclass_calibration(calibration_obj, class_labels=None, save_path=No
         prob_true = result["calibration_curve"]["prob_true"]
         brier = result["brier_score"]
         label = f"{class_labels[k]} (Brier: {brier:.3f})" # Format Brier score
-        plt.plot(prob_pred, prob_true, marker="o", markersize=6, lw=2, label=label, color=colors[k])
+        plt.plot(prob_pred, prob_true, marker="o", label=label)
 
-    plt.xlabel("Mean Predicted Probability", fontsize=14)
-    plt.ylabel("Fraction of Positives", fontsize=14)
-    plt.title("Multiclass Calibration Curves (One-vs-Rest)", fontsize=16)
-    plt.legend(loc='upper left', bbox_to_anchor=(1.05, 1), borderaxespad=0., fontsize=12) # External legend
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.xlabel("Mean Predicted Probability")
+    plt.ylabel("Fraction of Positives")
+    plt.title("Multiclass Calibration Curves (One-vs-Rest)")
+    plt.legend()
+    plt.grid(True)
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.gca().set_aspect('equal', adjustable='box')
     plt.tight_layout() # Adjust for external legend
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_decision_curve(dca_df, label='Model', save_path=None):
@@ -160,21 +148,20 @@ def plot_decision_curve(dca_df, label='Model', save_path=None):
         label (str): Label for the model in the legend.
         save_path (str, optional): Path to save the plot.
     """
-    plt.figure(figsize=(8, 6))
-    plt.plot(dca_df['threshold'], dca_df['net_benefit'], label=label, lw=2, color='purple')
-    plt.axhline(0, linestyle='--', color='gray', linewidth=1, alpha=0.8, label='Treat All/Treat None')
+    plt.plot(dca_df['threshold'], dca_df['net_benefit'], label=label)
+    plt.axhline(0, linestyle='--', color='gray', label='Treat All/Treat None')
     
     # Optional: Plot 'treat all' and 'treat none' if available in dca_df or calculable
     if 'net_benefit_all' in dca_df.columns:
-        plt.plot(dca_df['threshold'], dca_df['net_benefit_all'], linestyle=':', color='red', lw=1.5, label='Treat All')
+        plt.plot(dca_df['threshold'], dca_df['net_benefit_all'], label='Treat All')
     if 'net_benefit_none' in dca_df.columns:
-        plt.plot(dca_df['threshold'], dca_df['net_benefit_none'], linestyle=':', color='blue', lw=1.5, label='Treat None')
+        plt.plot(dca_df['threshold'], dca_df['net_benefit_none'], label='Treat None')
 
-    plt.xlabel('Threshold Probability', fontsize=14)
-    plt.ylabel('Net Benefit', fontsize=14)
-    plt.title('Decision Curve Analysis', fontsize=16)
-    plt.legend(loc='upper right', fontsize=12)
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.xlabel('Threshold Probability')
+    plt.ylabel('Net Benefit')
+    plt.title('Decision Curve Analysis')
+    plt.legend()
+    plt.grid(True)
     plt.xlim([0, 1])
     # Adjust y-axis limits to better fit data and include 0
     min_nb = dca_df['net_benefit'].min()
@@ -183,7 +170,7 @@ def plot_decision_curve(dca_df, label='Model', save_path=None):
     
     plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_threshold_metrics(threshold_dict, metrics=('sensitivity', 'specificity', 'ppv', 'npv'), save_path=None):
@@ -197,23 +184,20 @@ def plot_threshold_metrics(threshold_dict, metrics=('sensitivity', 'specificity'
     """
     df = pd.DataFrame.from_dict(threshold_dict, orient='index').sort_index(ascending=True)
     
-    plt.figure(figsize=(10, 7))
-    colors = sns.color_palette("viridis", len(metrics))
-    
     for i, metric in enumerate(metrics):
         if metric in df.columns:
-            plt.plot(df.index, df[metric], label=metric.replace('_', ' ').title(), lw=2, color=colors[i])
+            plt.plot(df.index, df[metric], label=metric.replace('_', ' ').title())
             
-    plt.xlabel('Threshold', fontsize=14)
-    plt.ylabel('Metric Value', fontsize=14)
-    plt.title('Threshold Analysis Metrics', fontsize=16)
-    plt.legend(loc='center right', bbox_to_anchor=(1.2, 0.5), fontsize=12) # External legend
-    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.xlabel('Threshold')
+    plt.ylabel('Metric Value')
+    plt.title('Threshold Analysis Metrics')
+    plt.legend()
+    plt.grid(True)
     plt.xlim([-0.01, 1.01])
     plt.ylim([-0.01, 1.01])
     plt.tight_layout() # Adjust for external legend
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
 def plot_regression_diagnostics(y_true, y_pred, save_path=None):
@@ -283,86 +267,61 @@ def plot_multiple_roc_curves_with_comparison(
         save_path (str, optional): Path to save the plot.
     """
     model_names = list(model_probs.keys())
-    aucs = {}
     stats = []
-
-    plt.figure(figsize=(9, 8)) # Larger figure
-    colors = sns.color_palette("deep", len(model_names))
-
     for i, name in enumerate(model_names):
-        y_prob = model_probs[name]
-        fpr, tpr, _ = roc_curve(y_true, y_prob)
+        fpr, tpr, _ = roc_curve(y_true, model_probs[name])
         auc_val = auc(fpr, tpr)
-        aucs[name] = auc_val
-        plt.plot(fpr, tpr, lw=2.5, label=f'{name} (AUC = {auc_val:.3f})', color=colors[i])
+        plt.plot(
+            fpr, tpr,
+            label=f"{name} (AUC = {auc_val:.3f})",
+        )
 
     # Plot settings
-    plt.plot([0, 1], [0, 1], linestyle='--', color='gray', lw=1, alpha=0.7, label='Random Guess')
-    plt.xlabel("False Positive Rate", fontsize=14)
-    plt.ylabel("True Positive Rate", fontsize=14)
-    plt.title("Comparison of ROC Curves", fontsize=16)
-    plt.grid(True, linestyle=':', alpha=0.7)
-    plt.xlim([-0.01, 1.01])
-    plt.ylim([-0.01, 1.01])
+    plt.plot(
+        [0, 1], [0, 1],
+        linestyle='--',
+        label='Random Guess',
+        color='gray'
+    )
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("Comparison of ROC Curves")
+    plt.grid(True)
+    plt.minorticks_on()
+    plt.grid(which='minor')
+    plt.xlim(-0.01, 1.01)
+    plt.ylim(-0.01, 1.01)
     plt.gca().set_aspect('equal', adjustable='box')
 
-    # Compute pairwise comparisons
-    if len(model_names) >= 2:
-        text_y_offset = 0.04
-        current_y_pos = 0.95 # Starting y position for p-values
-        
+    # Pairwise p-value annotations outside the plot
+    if show_pvalues_on_plot and len(model_names) > 1:
+        y0 = 0.95
         for i in range(len(model_names)):
             for j in range(i + 1, len(model_names)):
                 name1, name2 = model_names[i], model_names[j]
-                
-                # Check for mock functions and adjust calls
                 if method == "delong":
-                    if 'mock_delong_test' in globals() and delong_test.__name__ == 'mock_delong_test':
-                        # Call mock function with appropriate arguments
-                        pval, auc1, auc2 = delong_test(y_true, model_probs[name1], model_probs[name2])
-                    else:
-                        pval, auc1, auc2 = delong_test(y_true, model_probs[name1], model_probs[name2])
-                elif method == "bootstrap":
-                    bs = Bootstrapper(n_resamples=n_resamples)
-                    auc_dist1 = bs.bootstrap(metric_fn=roc_auc_score, y_true=y_true, y_pred=model_probs[name1])
-                    auc_dist2 = bs.bootstrap(metric_fn=roc_auc_score, y_true=y_true, y_pred=model_probs[name2])
-                    
-                    test_func = (
-                        ModelComparer.parametric if parametric else ModelComparer.nonparametric
-                    )
-                    pval = test_func(auc_dist1, auc_dist2)
-                    auc1, auc2 = np.median(auc_dist1), np.median(auc_dist2)
+                    pval, _, _ = delong_test(y_true, model_probs[name1], model_probs[name2])
                 else:
-                    raise ValueError("method must be 'delong' or 'bootstrap'")
+                    bs = Bootstrapper(n_resamples=n_resamples)
+                    dist1 = bs.bootstrap(roc_auc_score, y_true, model_probs[name1])
+                    dist2 = bs.bootstrap(roc_auc_score, y_true, model_probs[name2])
+                    test_fn = ModelComparer.parametric if parametric else ModelComparer.nonparametric
+                    pval = test_fn(dist1, dist2)
 
-                stats.append({
-                    "Model 1": name1,
-                    "Model 2": name2,
-                    "AUC 1": auc1,
-                    "AUC 2": auc2,
-                    "p-value": pval
-                })
+                stats.append({"Model 1": name1, "Model 2": name2, "p-value": pval})
+                p_str = 'p < 0.001' if pval < 0.001 else f'p = {pval:.3f}'
 
-                if show_pvalues_on_plot:
-                    if pval < 0.001:
-                        pval_str = 'p < 0.001'
-                    else:
-                        pval_str = f'p = {pval:.3f}'
-                    
-                    plt.text(
-                        0.02, current_y_pos,
-                        f"Comparison {name1} vs {name2}: {pval_str}",
-                        transform=plt.gca().transAxes, # Use axes coordinates
-                        fontsize=10,
-                        bbox=dict(boxstyle="round,pad=0.3", fc="wheat", ec="black", lw=0.5, alpha=0.8) # Add bbox for clarity
-                    )
-                    current_y_pos -= text_y_offset # Move down for next p-value
+                plt.annotate(
+                    f"{name1} vs {name2}: {p_str}",
+                    xy=(1.02, y0), xycoords='axes fraction',
+                    ha='left', va='top', fontsize=8
+                )
+                y0 -= 0.05
 
+    plt.legend()
 
-    plt.legend(loc="lower right", fontsize=12)
-    plt.tight_layout()
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.savefig(save_path)
     plt.show()
 
     if return_stats:
@@ -444,7 +403,6 @@ def plot_auc_bar_chart_with_error_bars(
     pval_df: pd.DataFrame = None, # Changed to DataFrame for more flexible p-value display
     ci: float = 0.95,
     title: str = "AUC Comparison with Confidence Intervals",
-    figsize: tuple = (10, 7), # Increased figure size
     annotate: bool = True,
     ylim: tuple = None,
     save_path: str = None
@@ -463,115 +421,87 @@ def plot_auc_bar_chart_with_error_bars(
         ylim (tuple, optional): Custom y-axis limits.
         save_path (str, optional): Path to save the plot.
     """
-    model_names = list(auc_dict.keys())
-    auc_values = [np.median(auc_dict[m]) for m in model_names]
-    
-    alpha_ci = (1 - ci) / 2 * 100
-    lower_bounds = [np.percentile(auc_dict[m], alpha_ci) for m in model_names]
-    upper_bounds = [np.percentile(auc_dict[m], 100 - alpha_ci) for m in model_names]
-    
-    error_bars = np.array([
-        [median - lower, upper - median]
-        for median, lower, upper in zip(auc_values, lower_bounds, upper_bounds)
-    ]).T
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
-    plt.figure(figsize=figsize)
-    bars = plt.bar(
+    model_names = list(auc_dict.keys())
+    medians = [np.median(auc_dict[m]) for m in model_names]
+    alpha = (1 - ci) / 2 * 100
+    lowers = [np.percentile(auc_dict[m], alpha) for m in model_names]
+    uppers = [np.percentile(auc_dict[m], 100 - alpha) for m in model_names]
+    errs = np.array([[m - lo, hi - m] for m, lo, hi in zip(medians, lowers, uppers)]).T
+
+    fig, ax = plt.subplots()
+    bars = ax.bar(
         model_names,
-        auc_values,
-        yerr=error_bars,
-        capsize=8, # Larger caps for error bars
-        alpha=0.9,
-        color=sns.color_palette("viridis", len(model_names)), # Use viridis for bars
-        edgecolor="black",
-        lw=1.5 # Thicker bar edges
+        medians,
+        yerr=errs,
+        capsize=3,
+        color=colors[:len(model_names)]
     )
 
-    # Annotate each bar with AUC and CI
+    # Spacing
+    bar_label_offset    = 0.002 
+    bracket_base_offset = 0.008    
+    bracket_height      = 0.0015   
+    pval_text_offset    = 0.001 
+    bar_label_fs = 7
+    pval_text_fs = 6
+
     if annotate:
-        for i, bar in enumerate(bars):
-            auc = auc_values[i]
-            lb = lower_bounds[i]
-            ub = upper_bounds[i]
-            label = f"{auc:.3f}\n[{lb:.3f}, {ub:.3f}]"
-            plt.text(
-                bar.get_x() + bar.get_width() / 2,
-                ub + 0.015, # Position slightly above upper CI
-                label,
-                ha='center',
-                va='bottom',
-                fontsize=10,
-                color='darkblue'
+        for bar, m, lo, hi in zip(bars, medians, lowers, uppers):
+            ax.text(
+                bar.get_x() + bar.get_width()/2,
+                hi + bar_label_offset,
+                f"{m:.3f}\n[{lo:.3f}, {hi:.3f}]",
+                ha="center", va="bottom",
+                fontsize=bar_label_fs
             )
 
-    # Calculate max Y for positioning brackets
-    max_y_for_brackets = max(upper_bounds) + 0.02
-    
+    # Draw p-value brackets
+    used_heights = {}
     if pval_df is not None and not pval_df.empty:
-        # Sort p-values to ensure consistent bracket drawing, e.g., smallest p-value first
-        pval_df = pval_df.sort_values(by="p-value").reset_index(drop=True)
-        
-        # Track occupied y-levels for brackets to avoid overlap
-        y_level_tracker = {} # Key: model name, Value: highest y-level used by its brackets
+        pval_df = pval_df.sort_values("p-value").reset_index(drop=True)
+        for _, row in pval_df.iterrows():
+            m1, m2, p = row["Model 1"], row["Model 2"], row["p-value"]
+            i1, i2 = model_names.index(m1), model_names.index(m2)
+            x1 = bars[i1].get_x() + bars[i1].get_width()/2
+            x2 = bars[i2].get_x() + bars[i2].get_width() + bars[i2].get_width()/2 - bars[i2].get_width()
 
-        for i, row in pval_df.iterrows():
-            m1, m2, pval = row["Model 1"], row["Model 2"], row["p-value"]
-            
-            idx1 = model_names.index(m1)
-            idx2 = model_names.index(m2)
-            
-            x1 = bars[idx1].get_x() + bars[idx1].get_width() / 2
-            x2 = bars[idx2].get_x() + bars[idx2].get_width() / 2
-            
-            # Determine starting y for this bracket based on involved bars' heights
-            current_bracket_y = max(upper_bounds[idx1], upper_bounds[idx2]) + 0.015
-            
-            # Adjust y-level to avoid collision with other brackets
-            if m1 in y_level_tracker:
-                current_bracket_y = max(current_bracket_y, y_level_tracker[m1] + 0.015)
-            if m2 in y_level_tracker:
-                current_bracket_y = max(current_bracket_y, y_level_tracker[m2] + 0.015)
-            
-            # Update tracker
-            y_level_tracker[m1] = current_bracket_y
-            y_level_tracker[m2] = current_bracket_y
+            base = max(uppers[i1], uppers[i2]) + bracket_base_offset
+            y0 = base + (bracket_height + 0.001) * len(used_heights)
+            used_heights[m1] = used_heights[m2] = y0
 
-            # Adjust max_y_for_brackets
-            max_y_for_brackets = max(max_y_for_brackets, current_bracket_y + 0.02) # Add space for p-value text
+            ax.plot(
+                [x1, x1, x2, x2],
+                [y0, y0 + bracket_height, y0 + bracket_height, y0],
+                color="black"
+            )
 
-            h = 0.005 # Height of the vertical line of the bracket
-            
-            if pval < 0.001:
-                pval_str = 'p < 0.001'
-            else:
-                pval_str = f'p = {pval:.3f}'
-            
-            # Draw the bracket
-            plt.plot([x1, x1, x2, x2], 
-                     [current_bracket_y, current_bracket_y + h, current_bracket_y + h, current_bracket_y], 
-                     lw=1.5, color='black')
-            
-            # Place the p-value text
-            plt.text((x1 + x2) / 2, current_bracket_y + h + 0.003, pval_str,
-                     ha='center', va='bottom', fontsize=11, color='darkred')
+            p_str = "p < 0.001" if p < 0.001 else f"p = {p:.3f}"
+            ax.text(
+                (x1 + x2)/2,
+                y0 + bracket_height + pval_text_offset,
+                p_str,
+                ha="center", va="bottom",
+                fontsize=pval_text_fs
+            )
 
-
-    # Set Y-axis limits
+    # Y-limits
     if ylim:
-        plt.ylim(*ylim)
+        ax.set_ylim(*ylim)
     else:
-        # Ensure there's enough space for bars, CIs, and potential p-value annotations
-        min_y = min(lower_bounds) - 0.05
-        max_y = max(max_y_for_brackets, max(upper_bounds) + 0.05)
-        plt.ylim(min_y, max_y)
+        low = min(lowers) - 0.005
+        high_candidates = uppers + list(used_heights.values())
+        high = max(high_candidates) + 0.005
+        ax.set_ylim(low, high)
 
-    plt.ylabel("AUC", fontsize=14)
-    plt.title(title, fontsize=16)
-    plt.grid(True, axis='y', linestyle='--', alpha=0.6)
-    plt.xticks(rotation=15, ha='right') # Rotate x-axis labels for better readability
-    plt.tight_layout()
+    ax.set_ylabel("AUC")
+    ax.set_title(title)
+    ax.grid(True)
+    plt.xticks()
+
     if save_path:
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        fig.savefig(save_path)
     plt.show()
 
 def plot_kaplan_meier(durations, events, ax=None, label=None, save_path=None, **kwargs):
